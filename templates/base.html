@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Lịch Chấm Công{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('calendar') }}" class="brand">LỊCH CHẤM CÔNG</a>
+        <div class="nav-links">
+            {% if current_user.is_authenticated %}
+                <span>Xin chào, Admin!</span>
+                <a href="{{ url_for('logout') }}">Đăng xuất</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Đăng nhập Quản trị</a>
+            {% endif %}
+        </div>
+    </nav>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
