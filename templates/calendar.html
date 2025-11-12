@@ -24,57 +24,33 @@ document.addEventListener('DOMContentLoaded', function() {
     var absentBtn = document.getElementById('absentBtn');
     var noteInput = document.getElementById('noteInput');
 
-    var isMobile = window.innerWidth <= 768;
-
     var calendarOptions = {
-        initialView: isMobile ? 'listWeek' : 'dayGridMonth',
+        // Luôn hiển thị chế độ xem tháng
+        initialView: 'dayGridMonth',
         locale: 'vi',
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
-            right: isMobile ? 'listWeek,dayGridMonth' : 'dayGridMonth'
+            // Chỉ giữ lại nút xem tháng
+            right: 'dayGridMonth'
         },
         events: '/api/attendance',
-
-        // --- THAY ĐỔI NẰM Ở ĐÂY ---
-        // Tùy chỉnh cách hiển thị nội dung sự kiện
-        eventContent: function(arg) {
-            // Chỉ áp dụng cho chế độ xem danh sách (trên điện thoại)
-            if (arg.view.type.startsWith('list')) {
-                // Tạo một div để chứa nội dung tùy chỉnh
-                let customDiv = document.createElement('div');
-                customDiv.className = 'fc-list-event-title';
-
-                // Tạo dấu chấm màu
-                let dotEl = document.createElement('span');
-                dotEl.className = 'fc-list-event-dot';
-                dotEl.style.borderColor = arg.event.backgroundColor;
-
-                // Lấy nội dung ghi chú
-                let title = document.createTextNode(arg.event.title);
-
-                // Thêm dấu chấm và ghi chú vào div
-                customDiv.appendChild(dotEl);
-                customDiv.appendChild(title);
-                
-                // Trả về nội dung đã tùy chỉnh, loại bỏ "all-day"
-                return { domNodes: [customDiv] };
-            }
-            // Đối với các chế độ xem khác (lịch tháng), giữ nguyên mặc định
-        },
         
         dateClick: function(info) {
-            if (!{{ is_admin | tojson }}) return; // Ngăn click nếu không phải admin
+            // Ngăn click nếu không phải admin
+            if (!{{ is_admin | tojson }}) return;
 
             selectedDate = info.dateStr;
             document.getElementById('modalDate').innerText = 'Chấm công: ' + info.dateStr;
             
             let event = calendar.getEvents().find(e => e.startStr === info.dateStr);
 
+            // Reset modal trước khi điền thông tin mới
             noteInput.value = '';
             presentBtn.classList.remove('active-status');
             absentBtn.classList.remove('active-status');
 
+            // Nếu có sự kiện cũ, điền lại thông tin
             if (event) {
                 let props = event.extendedProps;
                 noteInput.value = props.note || '';
@@ -100,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({ 
                     date: selectedDate, 
                     status: status, 
-                    note: noteInput.value
+                    note: noteInput.value 
                 })
             })
             .then(res => res.json())
